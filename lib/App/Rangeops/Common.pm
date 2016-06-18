@@ -6,6 +6,7 @@ use autodie;
 use 5.010001;
 
 use Carp;
+use Graph;
 use IO::Zlib;
 use List::MoreUtils;
 use Path::Tiny;
