@@ -1,0 +1,20 @@
+/App-Rangeops-*
+
+META.yml
+Makefile
+inc/
+pm_to_blib
+*~
+blib
+/.build
+/_build_params
+/Build
+!Build/
+!META.json
+!LICENSE
+
+!.travis.yml
+
+# IDE
+.idea
+.komodotools
