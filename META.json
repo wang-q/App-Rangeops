@@ -58,6 +58,17 @@
       }
    },
    "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/wang-q/App-Rangeops/issues"
+      },
+      "homepage" : "https://github.com/wang-q/App-Rangeops",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/wang-q/App-Rangeops.git",
+         "web" : "https://github.com/wang-q/App-Rangeops"
+      }
+   },
    "version" : "0.0.1"
 }
 

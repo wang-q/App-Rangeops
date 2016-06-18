@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/wang-q/App-Rangeops.svg?branch=master)](https://travis-ci.org/wang-q/App-Rangeops)
+[![Cpan version](https://img.shields.io/cpan/v/App-Rangeops.svg)](https://metacpan.org/release/App-Rangeops)
+
 # NAME
 
 App::Rangeops - operates ranges and links of ranges on chromosomes
