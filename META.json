@@ -1,0 +1,63 @@
+{
+   "abstract" : "operates ranges and links of ranges on chromosomes",
+   "author" : [
+      "Qiang Wang <wang-q@outlook.com>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 5.047, Dist::Milla version v1.0.15, CPAN::Meta::Converter version 2.150005",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "App-Rangeops",
+   "no_index" : {
+      "directory" : [
+         "eg",
+         "examples",
+         "inc",
+         "share",
+         "t",
+         "xt"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build::Tiny" : "0.034"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Dist::Milla" : "v1.0.15",
+            "Test::Pod" : "1.41"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "AlignDB::IntSpan" : "v1.0.7",
+            "App::Cmd" : "0.330",
+            "App::RL" : "v0.2.23",
+            "Graph" : "0",
+            "IO::Zlib" : "0",
+            "IPC::Cmd" : "0",
+            "List::MoreUtils" : "0.413",
+            "MCE" : "1.708",
+            "Path::Tiny" : "0.076",
+            "Tie::IxHash" : "1.23",
+            "YAML::Syck" : "1.29",
+            "perl" : "5.010001"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::More" : "0.88"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.0.1"
+}
+
