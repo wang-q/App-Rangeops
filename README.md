@@ -20,6 +20,22 @@ App::Rangeops - operates ranges and links of ranges on chromosomes
 
 See `rangeops commands` for usage information.
 
+# DESCRIPTION
+
+Types of links:
+
+- Bilateral links
+
+        I(+):13063-17220    I(-):215091-219225
+        I(+):139501-141431  XII(+):95564-97485
+
+- Bilateral links with hit strand
+
+        I(+):13327-17227    I(+):215084-218967      -
+        I(+):139501-141431  XII(+):95564-97485      +
+
+- Multilateral links
+
 # AUTHOR
 
 Qiang Wang &lt;wang-q@outlook.com>
