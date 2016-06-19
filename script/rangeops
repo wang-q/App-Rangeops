@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+use strict;
+use warnings;
 use App::Rangeops;
 
 App::Rangeops->run;
@@ -14,3 +16,5 @@ __END__
 perl -I lib/ script/rangeops
 
 perl -I lib/ script/rangeops merge t/I.links.tsv -o stdout
+
+perl -I lib/ script/rangeops sort t/I.links.tsv -o stdout
