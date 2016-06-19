@@ -60,16 +60,11 @@ sub execute {
     my $info_of = {};    # info of ranges
     for my $file ( @{$args} ) {
         for my $line ( App::RL::Common::read_lines($file) ) {
+            $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
+
             my @parts;
             for my $part ( split /\t/, $line ) {
-
-                my $info = App::RL::Common::decode_header($part);
-                next unless App::RL::Common::info_is_valid($info);
-
-                if ( !exists $info_of->{$part} ) {
-                    $info_of->{$part} = $info;
-                }
-
+                next unless exists $info_of->{$part};
                 push @parts, $part;
             }
 
