@@ -45,13 +45,14 @@ perl -I lib/ script/rangeops merge S288c/links.lastz.tsv S288c/links.blast.tsv \
 perl -I lib/ script/rangeops sort S288c/links.lastz.tsv S288c/links.blast.tsv \
     -o S288c/sort.tsv
 
-perl -I lib/ script/rangeops clean S288c/sort.tsv -o S288c/clean.tsv
+perl -I lib/ script/rangeops clean S288c/sort.tsv -r S288c/merge.tsv \
+    -o S288c/clean.tsv
 
 perl -I lib/ script/rangeops connect S288c/clean.tsv -o S288c/connect.tsv
 
 wc -l S288c/*.tsv
 
-     351 S288c/clean.tsv
+     275 S288c/clean.tsv
      155 S288c/connect.tsv
      566 S288c/links.blast.tsv
      346 S288c/links.lastz.tsv
@@ -62,6 +63,25 @@ cat S288c/connect.tsv \
     | perl -nla -F"\t" -e 'print for @F' \
     | runlist cover stdin -o S288c/cover.yml
 
-runlist stat --size chr.sizes S288c/cover.yml -o stdout
+runlist stat --size S288c/chr.sizes S288c/cover.yml -o stdout
+perl ~/Scripts/egas/cover_figure.pl --size t/chr.sizes -f S288c/cover.yml
 
+# Atha
+perl -I lib/ script/rangeops merge Atha/links.lastz.tsv Atha/links.blast.tsv \
+    -o Atha/merge.tsv -p 5
 
+perl -I lib/ script/rangeops sort Atha/links.lastz.tsv Atha/links.blast.tsv \
+    -o Atha/sort.tsv
+
+perl -I lib/ script/rangeops clean Atha/sort.tsv -r Atha/merge.tsv \
+    -o Atha/clean.tsv
+
+perl -I lib/ script/rangeops connect Atha/clean.tsv -o Atha/connect.tsv
+
+wc -l Atha/*.tsv
+
+cat Atha/connect.tsv \
+    | perl -nla -F"\t" -e 'print for @F' \
+    | runlist cover stdin -o Atha/cover.yml
+
+runlist stat --size Atha/chr.sizes Atha/cover.yml -o stdout
