@@ -51,7 +51,7 @@ sub execute {
     # Loading
     #----------------------------#
     my @lines;
-    my $info_of_range = {};
+    my $info_of = {};
     for my $file ( @{$args} ) {
         for my $line ( App::Rangeops::Common::read_lines($file) ) {
             for my $part ( split /\t/, $line ) {
@@ -59,89 +59,16 @@ sub execute {
                 next unless App::RL::Common::info_is_valid($info);
 
                 push @lines, $line;    # May produce duplicated lines
-                if ( !exists $info_of_range->{$part} ) {
-                    $info_of_range->{$part} = $info;
+                if ( !exists $info_of->{$part} ) {
+                    $info_of->{$part} = $info;
                 }
             }
         }
     }
     @lines = List::MoreUtils::PP::uniq(@lines);
 
-    #----------------------------#
-    # Sort within links
-    #----------------------------#
-    for my $line (@lines) {
-        my @parts = split /\t/, $line;
-        my @invalids = grep { !exists $info_of_range->{$_} } @parts;
-        my @ranges   = grep { exists $info_of_range->{$_} } @parts;
-
-        # chromosome strand
-        @ranges = map { $_->[0] }
-            sort { $a->[1] cmp $b->[1] }
-                map { [ $_, $info_of_range->{$_}{strand} ] } @ranges;
-
-        # start point on chromosomes
-        @ranges = map { $_->[0] }
-        sort { $a->[1] <=> $b->[1] }
-        map { [ $_, $info_of_range->{$_}{start} ] } @ranges;
-
-        # chromosome name
-        if ( $opt->{numeric} ) {
-            @ranges = map { $_->[0] }
-                sort { $a->[1] <=> $b->[1] }
-                map { [ $_, $info_of_range->{$_}{chr} ] } @ranges;
-        }
-        else {
-            @ranges = map { $_->[0] }
-                sort { $a->[1] cmp $b->[1] }
-                map { [ $_, $info_of_range->{$_}{chr} ] } @ranges;
-        }
-
-        $line = join "\t", ( @ranges, @invalids );
-    }
-
-    #----------------------------#
-    # Sort by first range's chromosome order among links
-    #----------------------------#
-    {
-        # after swapping, remove dups again
-        @lines = sort @lines;
-        @lines = List::MoreUtils::PP::uniq(@lines);
-
-        # strand
-        @lines = map { $_->[0] }
-            sort { $a->[1] cmp $b->[1] }
-                map {
-                    my $first = ( split /\t/ )[0];
-                    [ $_, $info_of_range->{$first}{strand} ]
-                } @lines;
-
-        # start
-        @lines = map { $_->[0] }
-            sort { $a->[1] <=> $b->[1] }
-            map {
-            my $first = ( split /\t/ )[0];
-            [ $_, $info_of_range->{$first}{start} ]
-            } @lines;
-
-        # chromosome name
-        if ( $opt->{numeric} ) {
-            @lines = map { $_->[0] }
-                sort { $a->[1] <=> $b->[1] }
-                map {
-                my $first = ( split /\t/ )[0];
-                [ $_, $info_of_range->{$first}{chr} ]
-                } @lines;
-        }
-        else {
-            @lines = map { $_->[0] }
-                sort { $a->[1] cmp $b->[1] }
-                map {
-                my $first = ( split /\t/ )[0];
-                [ $_, $info_of_range->{$first}{chr} ]
-                } @lines;
-        }
-    }
+    my @sorted_lines = @{ App::Rangeops::Common::sort_links( \@lines, $info_of,
+            $opt->{numeric} ) };
 
     #----------------------------#
     # Output
@@ -154,7 +81,7 @@ sub execute {
         open $out_fh, ">", $opt->{outfile};
     }
 
-    print {$out_fh} "$_\n" for @lines;
+    print {$out_fh} "$_\n" for @sorted_lines;
 
     close $out_fh;
 }
