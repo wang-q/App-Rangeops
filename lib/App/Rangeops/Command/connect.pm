@@ -209,10 +209,13 @@ sub execute {
                     my $diff_ratio = sprintf "%.3f", $size_min / $size_max;
 
                     if ( $diff_ratio < $opt->{ratio} ) {
-                        printf " " x 4 . "Break links between %s %s\n",
-                            $ranges[$i], $ranges[$j];
-                        printf " " x 4 . "Ratio[%s]\tMin [%s]\tMax[%s]\n",
-                            $diff_ratio, $size_min, $size_max;
+                        printf STDERR " " x 4 . "Break links between %s %s\n",
+                            $ranges[$i], $ranges[$j]
+                            if $opt->{verbose};
+                        printf STDERR " " x 4
+                            . "Ratio[%s]\tMin [%s]\tMax[%s]\n",
+                            $diff_ratio, $size_min, $size_max
+                            if $opt->{verbose};
                     }
                     else {
                         push @edges, [ $i, $j ];

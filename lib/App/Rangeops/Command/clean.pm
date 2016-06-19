@@ -62,15 +62,11 @@ sub execute {
     my $replace_of = {};
     if ( $opt->{replace} ) {
         for my $line ( App::RL::Common::read_lines( $opt->{replace} ) ) {
+            $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
+
             my @parts = split /\t/, $line;
             if ( @parts == 2 ) {
                 $replace_of->{ $parts[0] } = $parts[1];
-                for my $part (@parts) {
-                    if ( !exists $info_of->{$part} ) {
-                        $info_of->{$part}
-                            = App::RL::Common::decode_header($part);
-                    }
-                }
             }
         }
     }
@@ -80,22 +76,19 @@ sub execute {
     #----------------------------#
     my @lines;
     for my $line ( App::RL::Common::read_lines( $args->[0] ) ) {
+        $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
+
         my @new_parts;
 
         # replacing
         for my $part ( split /\t/, $line ) {
 
-            # valid or invalid parts
-            if ( !exists $info_of->{$part} ) {
-                $info_of->{$part} = App::RL::Common::decode_header($part);
-            }
-
             if ( exists $replace_of->{$part} ) {
                 my $original = $part;
                 my $replaced = $replace_of->{$part};
 
-                # create new hash from reference
-                # don't touch anything of $info_of_range
+                # create new info, don't touch anything of $info_of
+                # use original strand
                 my %new = %{ $info_of->{$replaced} };
                 $new{strand} = $info_of->{$original}{strand};
 
@@ -107,6 +100,7 @@ sub execute {
             }
         }
         my $new_line = join "\t", @new_parts;
+        $info_of = App::Rangeops::Common::build_info( [$new_line], $info_of );
 
         # incorporating
         if ( @new_parts == 3 or @new_parts == 2 ) {
@@ -152,6 +146,7 @@ sub execute {
                 }
             }
         }
+        $info_of = App::Rangeops::Common::build_info( [$new_line], $info_of );
 
         # skip identical ranges
         if ( @new_parts == 2 ) {
@@ -173,6 +168,7 @@ sub execute {
         push @lines, $new_line;
     }
     @lines = grep {defined} List::MoreUtils::PP::uniq(@lines);
+    $info_of = App::Rangeops::Common::build_info( \@lines, $info_of );
 
     #----------------------------#
     # Remove nested links

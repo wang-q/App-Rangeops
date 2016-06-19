@@ -16,17 +16,15 @@ use YAML::Syck;
 use AlignDB::IntSpan;
 use App::RL::Common;
 
-sub sort_links {
-    my $lines_ref = shift;
-    my $numeric   = shift;
+sub build_info {
+    my $line_refs = shift;
+    my $info_of   = shift;
 
-    my @lines = @{$lines_ref};
+    if ( !defined $info_of ) {
+        $info_of = {};
+    }
 
-    #----------------------------#
-    # Cache info
-    #----------------------------#
-    my $info_of   = {};
-    for my $line (@lines) {
+    for my $line ( @{$line_refs} ) {
         for my $part ( split /\t/, $line ) {
             my $info = App::RL::Common::decode_header($part);
             next unless App::RL::Common::info_is_valid($info);
@@ -36,6 +34,20 @@ sub sort_links {
             }
         }
     }
+
+    return $info_of;
+}
+
+sub sort_links {
+    my $line_refs = shift;
+    my $numeric   = shift;
+
+    my @lines = @{$line_refs};
+
+    #----------------------------#
+    # Cache info
+    #----------------------------#
+    my $info_of =  build_info( \@lines );
 
     #----------------------------#
     # Sort within links
