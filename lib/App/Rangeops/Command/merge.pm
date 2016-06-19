@@ -15,8 +15,8 @@ use constant abstract => 'merge overlapped ranges via overlapping graph';
 sub opt_spec {
     return (
         [   "coverage|c=f",
-            "When larger than this ratio, merge ranges, default is [0.9]",
-            { default => 0.9 }
+            "When larger than this ratio, merge ranges, default is [0.95]",
+            { default => 0.95 }
         ],
         [ "outfile|o=s", "Output filename. [stdout] for screen." ],
         [   "parallel|p=i",
