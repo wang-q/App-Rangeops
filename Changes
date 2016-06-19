@@ -2,6 +2,9 @@ Revision history for App-Rangeops
 
 {{$NEXT}}
 
+0.0.5  2016-06-20 02:35:23 CST
+    - Command connect
+
 0.0.4  2016-06-19 13:05:09 CST
     - Rename command replace to clean
 
