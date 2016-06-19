@@ -17,10 +17,7 @@ sub opt_spec {
 }
 
 sub usage_desc {
-    my $self = shift;
-    my $desc = $self->SUPER::usage_desc;    # "%c COMMAND %o"
-    $desc .= " <infiles>";
-    return $desc;
+    return "rangeops sort [options] <infiles>";
 }
 
 sub description {
