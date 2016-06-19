@@ -67,7 +67,7 @@ sub execute {
     my $graph_of_chr = {};
     my $info_of      = {};
     for my $file ( @{$args} ) {
-        my @lines = App::Rangeops::Common::read_lines($file);
+        my @lines = App::RL::Common::read_lines($file);
         for my $line (@lines) {
             for my $part ( split /\t/, $line ) {
                 my $info = App::RL::Common::decode_header($part);

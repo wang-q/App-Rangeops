@@ -58,13 +58,13 @@ sub execute {
     #----------------------------#
     # Loading
     #----------------------------#
-    my $info_of = {};    # info of ranges
-    my $replace = {};
+    my $info_of    = {};    # info of ranges
+    my $replace_of = {};
     if ( $opt->{replace} ) {
-        for my $line ( App::Rangeops::Common::read_lines( $opt->{replace} ) ) {
+        for my $line ( App::RL::Common::read_lines( $opt->{replace} ) ) {
             my @parts = split /\t/, $line;
             if ( @parts == 2 ) {
-                $replace->{ $parts[0] } = $parts[1];
+                $replace_of->{ $parts[0] } = $parts[1];
                 for my $part (@parts) {
                     if ( !exists $info_of->{$part} ) {
                         $info_of->{$part}
@@ -79,7 +79,7 @@ sub execute {
     # Replacing and incorporating
     #----------------------------#
     my @lines;
-    for my $line ( App::Rangeops::Common::read_lines( $args->[0] ) ) {
+    for my $line ( App::RL::Common::read_lines( $args->[0] ) ) {
         my @new_parts;
 
         # replacing
@@ -90,9 +90,9 @@ sub execute {
                 $info_of->{$part} = App::RL::Common::decode_header($part);
             }
 
-            if ( exists $replace->{$part} ) {
+            if ( exists $replace_of->{$part} ) {
                 my $original = $part;
-                my $replaced = $replace->{$part};
+                my $replaced = $replace_of->{$part};
 
                 # create new hash from reference
                 # don't touch anything of $info_of_range

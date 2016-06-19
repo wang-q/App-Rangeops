@@ -52,7 +52,7 @@ sub execute {
     #----------------------------#
     my @lines;
     for my $file ( @{$args} ) {
-        for my $line ( App::Rangeops::Common::read_lines($file) ) {
+        for my $line ( App::RL::Common::read_lines($file) ) {
             for my $part ( split /\t/, $line ) {
                 my $info = App::RL::Common::decode_header($part);
                 next unless App::RL::Common::info_is_valid($info);

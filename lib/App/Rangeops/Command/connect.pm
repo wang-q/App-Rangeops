@@ -59,7 +59,7 @@ sub execute {
     my $graph = Graph->new( directed => 0 );
     my $info_of = {};    # info of ranges
     for my $file ( @{$args} ) {
-        for my $line ( App::Rangeops::Common::read_lines($file) ) {
+        for my $line ( App::RL::Common::read_lines($file) ) {
             my @parts;
             for my $part ( split /\t/, $line ) {
 
