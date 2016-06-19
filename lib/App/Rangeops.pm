@@ -1,6 +1,6 @@
 package App::Rangeops;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 use App::Cmd::Setup -app;
 

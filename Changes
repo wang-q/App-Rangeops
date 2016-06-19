@@ -2,6 +2,9 @@ Revision history for App-Rangeops
 
 {{$NEXT}}
 
+0.0.2  2016-06-19 08:15:16 CST
+    - Command sort
+
 0.0.1  2016-06-19 04:38:49 CST
     - Init commit
     - Command merge works
