@@ -57,3 +57,11 @@ wc -l S288c/*.tsv
      346 S288c/links.lastz.tsv
      132 S288c/merge.tsv
      626 S288c/sort.tsv
+
+cat S288c/connect.tsv \
+    | perl -nla -F"\t" -e 'print for @F' \
+    | runlist cover stdin -o S288c/cover.yml
+
+runlist stat --size chr.sizes S288c/cover.yml -o stdout
+
+
