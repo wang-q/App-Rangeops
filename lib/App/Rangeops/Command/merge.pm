@@ -28,15 +28,14 @@ sub opt_spec {
 }
 
 sub usage_desc {
-    my $self = shift;
-    my $desc = $self->SUPER::usage_desc;    # "%c COMMAND %o"
-    $desc .= " <infiles>";
-    return $desc;
+    return "rangeops merge [options] <infiles>";
 }
 
 sub description {
     my $desc;
     $desc .= ucfirst(abstract) . ".\n";
+    $desc .= "\tMerged ranges are always on positive strands.\n";
+
     return $desc;
 }
 
@@ -161,39 +160,24 @@ sub execute {
         for my $c (@cc) {
             printf "\n" . " " x 4 . "Merge %s ranges\n", scalar @{$c}
                 if $opt->{verbose};
-            my $chr       = $info_of_range->{ $c->[0] }{chr};
             my $merge_set = AlignDB::IntSpan->new;
-            my @strands;
-            my ( $strand, $change );
             for my $range ( @{$c} ) {
                 my $set = $info_of_range->{$range}{intspan};
                 $merge_set->merge($set);
-                push @strands, $info_of_range->{$range}{strand};
             }
-            @strands = List::MoreUtils::PP::uniq(@strands);
-            if ( @strands == 1 ) {
-                $strand = $strands[0];
-                $change = 0;
-            }
-            else {
-                $strand = "+";
-                $change = 1;
-            }
-            my $merge_range = "$chr($strand):" . $merge_set->runlist;
+
+            my $merge_range = App::RL::Common::encode_header(
+                {   chr    => $chr,
+                    strand => "+",
+                    start  => $merge_set->min,
+                    end    => $merge_set->max,
+                }
+            );
 
             for my $range ( @{$c} ) {
                 next if $range eq $merge_range;
 
-                my $range_change = 0;
-                if ($change) {
-                    my $range_strand = $info_of_range->{$range}{strand};
-                    if ( $range_strand ne $strand ) {
-                        $range_change = 1;
-                    }
-                }
-
-                my $line = sprintf "%s\t%s\t%d", $range, $merge_range,
-                    $range_change;
+                my $line = sprintf "%s\t%s", $range, $merge_range;
                 push @lines, $line;
                 print " " x 8 . "$line\n" if $opt->{verbose};
             }
