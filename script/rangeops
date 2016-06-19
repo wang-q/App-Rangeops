@@ -15,19 +15,45 @@ __END__
 
 perl -I lib/ script/rangeops
 
-perl -I lib/ script/rangeops sort t/I.links.tsv -o stdout
-cat t/I.links.tsv \
-    | perl -I lib/ script/rangeops sort stdin -o stdout
+perl -I lib/ script/rangeops sort t/II.links.tsv -o stdout
+cat t/II.links.tsv \
+    | perl -I lib/ script/rangeops sort stdin -o t/II.sort.tsv
 
-perl -I lib/ script/rangeops merge t/I.links.tsv -o stdout
-cat t/I.links.tsv \
-    | perl -I lib/ script/rangeops merge stdin -o stdout
+perl -I lib/ script/rangeops merge t/II.links.tsv -o stdout
+cat t/II.links.tsv \
+    | perl -I lib/ script/rangeops merge stdin -o t/II.merge.tsv
 
-perl -I lib/ script/rangeops clean t/I.sort.tsv -o stdout
-perl -I lib/ script/rangeops clean t/I.sort.tsv -r t/I.merge.tsv -o stdout
+perl -I lib/ script/rangeops clean t/II.sort.tsv -o stdout
+perl -I lib/ script/rangeops clean t/II.sort.tsv -r t/II.merge.tsv -o stdout
+cat t/II.sort.tsv \
+    | perl -I lib/ script/rangeops clean stdin -r t/II.merge.tsv -o t/II.clean.tsv
 
-perl -I lib/ script/rangeops merge t/I.lastz.tsv t/I.blast.tsv -o stdout
+perl -I lib/ script/rangeops connect t/II.clean.tsv -o stdout
 
-perl -I lib/ script/rangeops sort t/I.lastz.tsv t/I.blast.tsv -o stdout \
-    | perl -I lib/ script/rangeops clean stdin -r t/I.merge.tsv -o stdout
+# S288c chr II
+perl -I lib/ script/rangeops merge t/II.lastz.tsv t/II.blast.tsv -o stdout \
+    > t/II.merge.tsv
 
+perl -I lib/ script/rangeops sort t/II.lastz.tsv t/II.blast.tsv -o stdout \
+    | perl -I lib/ script/rangeops clean stdin -r t/II.merge.tsv -o stdout \
+    > t/II.clean.tsv
+
+# S288c
+perl -I lib/ script/rangeops merge S288c/links.lastz.tsv S288c/links.blast.tsv \
+    -o S288c/merge.tsv
+
+perl -I lib/ script/rangeops sort S288c/links.lastz.tsv S288c/links.blast.tsv \
+    -o S288c/sort.tsv
+
+perl -I lib/ script/rangeops clean S288c/sort.tsv -o S288c/clean.tsv
+
+perl -I lib/ script/rangeops connect S288c/clean.tsv -o S288c/connect.tsv
+
+wc -l S288c/S288c.*.tsv
+
+     566 S288c/links.blast.tsv
+     351 S288c/clean.tsv
+     155 S288c/connect.tsv
+     346 S288c/links.lastz.tsv
+     132 S288c/merge.tsv
+     626 S288c/sort.tsv
