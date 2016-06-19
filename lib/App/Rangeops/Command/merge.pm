@@ -67,7 +67,7 @@ sub execute {
     my $graph_of_chr  = {};
     my $info_of_range = {};
     for my $file ( @{$args} ) {
-        my @lines = Path::Tiny::path($file)->lines( { chomp => 1 } );
+        my @lines = App::Rangeops::Common::read_lines($file);
         for my $line (@lines) {
             for my $part ( split /\t/, $line ) {
                 my $info = App::RL::Common::decode_header($part);

@@ -12,7 +12,6 @@ sub opt_spec {
     return (
         [ "outfile|o=s", "Output filename. [stdout] for screen." ],
         [ "numeric|n",   "Sort chromosome names numerically.", ],
-        [ "verbose|v",   "Verbose mode.", ],
     );
 }
 
@@ -54,7 +53,7 @@ sub execute {
     my @lines;
     my $info_of_range = {};
     for my $file ( @{$args} ) {
-        for my $line ( Path::Tiny::path($file)->lines( { chomp => 1 } ) ) {
+        for my $line ( App::Rangeops::Common::read_lines($file) ) {
             for my $part ( split /\t/, $line ) {
                 my $info = App::RL::Common::decode_header($part);
                 next unless App::RL::Common::info_is_valid($info);
@@ -76,15 +75,15 @@ sub execute {
         my @invalids = grep { !exists $info_of_range->{$_} } @parts;
         my @ranges   = grep { exists $info_of_range->{$_} } @parts;
 
-        # start point on chromosomes
-        @ranges = map { $_->[0] }
-            sort { $a->[1] <=> $b->[1] }
-            map { [ $_, $info_of_range->{$_}{start} ] } @ranges;
-
         # chromosome strand
         @ranges = map { $_->[0] }
             sort { $a->[1] cmp $b->[1] }
-            map { [ $_, $info_of_range->{$_}{strand} ] } @ranges;
+                map { [ $_, $info_of_range->{$_}{strand} ] } @ranges;
+
+        # start point on chromosomes
+        @ranges = map { $_->[0] }
+        sort { $a->[1] <=> $b->[1] }
+        map { [ $_, $info_of_range->{$_}{start} ] } @ranges;
 
         # chromosome name
         if ( $opt->{numeric} ) {
@@ -109,20 +108,20 @@ sub execute {
         @lines = sort @lines;
         @lines = List::MoreUtils::PP::uniq(@lines);
 
+        # strand
+        @lines = map { $_->[0] }
+            sort { $a->[1] cmp $b->[1] }
+                map {
+                    my $first = ( split /\t/ )[0];
+                    [ $_, $info_of_range->{$first}{strand} ]
+                } @lines;
+
         # start
         @lines = map { $_->[0] }
             sort { $a->[1] <=> $b->[1] }
             map {
             my $first = ( split /\t/ )[0];
             [ $_, $info_of_range->{$first}{start} ]
-            } @lines;
-
-        # strand
-        @lines = map { $_->[0] }
-            sort { $a->[1] cmp $b->[1] }
-            map {
-            my $first = ( split /\t/ )[0];
-            [ $_, $info_of_range->{$first}{strand} ]
             } @lines;
 
         # chromosome name
