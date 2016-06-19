@@ -21,7 +21,7 @@ sub opt_spec {
         [ "outfile|o=s", "Output filename. [stdout] for screen." ],
         [   "parallel|p=i",
             "Run in parallel mode. Default is [1].",
-            { default => 50 },
+            { default => 1 },
         ],
         [ "verbose|v", "Verbose mode.", ],
     );
@@ -98,7 +98,6 @@ sub execute {
         my ( $self, $chunk_ref, $chunk_id ) = @_;
 
         my $chr = $chunk_ref->[0];
-        my $wid = MCE->wid;
 
         my $g      = $graph_of_chr->{$chr};
         my @ranges = sort $g->vertices;
@@ -201,6 +200,9 @@ sub execute {
         }
     }
 
+    #----------------------------#
+    # Output
+    #----------------------------#
     my $out_fh;
     if ( lc( $opt->{outfile} ) eq "stdout" ) {
         $out_fh = \*STDOUT;
