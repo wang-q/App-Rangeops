@@ -23,12 +23,11 @@ perl -I lib/ script/rangeops merge t/I.links.tsv -o stdout
 cat t/I.links.tsv \
     | perl -I lib/ script/rangeops merge stdin -o stdout
 
-perl -I lib/ script/rangeops replace t/I.links.tsv -o stdout
-perl -I lib/ script/rangeops replace t/I.sort.tsv -o stdout
-perl -I lib/ script/rangeops replace t/I.sort.tsv -r t/I.merge.tsv -o stdout
+perl -I lib/ script/rangeops clean t/I.sort.tsv -o stdout
+perl -I lib/ script/rangeops clean t/I.sort.tsv -r t/I.merge.tsv -o stdout
 
 perl -I lib/ script/rangeops merge t/I.lastz.tsv t/I.blast.tsv -o stdout
 
 perl -I lib/ script/rangeops sort t/I.lastz.tsv t/I.blast.tsv -o stdout \
-    | perl -I lib/ script/rangeops replace stdin -r t/I.merge.tsv -o stdout
+    | perl -I lib/ script/rangeops clean stdin -r t/I.merge.tsv -o stdout
 
