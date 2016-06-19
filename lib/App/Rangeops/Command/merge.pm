@@ -63,9 +63,9 @@ sub execute {
 
     #----------------------------#
     # Loading
-    #----------------------------#
-    my $graph_of_chr  = {};
-    my $info_of_range = {};
+    #----------------------------#π
+    my $graph_of_chr = {};
+    my $info_of      = {};
     for my $file ( @{$args} ) {
         my @lines = App::Rangeops::Common::read_lines($file);
         for my $line (@lines) {
@@ -83,7 +83,7 @@ sub execute {
                     $graph_of_chr->{$chr}->add_vertex($range);
                     $info->{intspan} = AlignDB::IntSpan->new;
                     $info->{intspan}->add_pair( $info->{start}, $info->{end} );
-                    $info_of_range->{$range} = $info;
+                    $info_of->{$range} = $info;
                     print STDERR "Add range $range\n" if $opt->{verbose};
                 }
             }
@@ -106,10 +106,10 @@ sub execute {
             printf STDERR " " x 4 . "Range %d / %d\t%s\n", $i, $#ranges,
                 $range_i
                 if $opt->{verbose};
-            my $set_i = $info_of_range->{$range_i}{intspan};
+            my $set_i = $info_of->{$range_i}{intspan};
             for my $j ( $i + 1 .. $#ranges ) {
                 my $range_j = $ranges[$j];
-                my $set_j   = $info_of_range->{$range_j}{intspan};
+                my $set_j   = $info_of->{$range_j}{intspan};
 
                 my $i_set = $set_i->intersect($set_j);
                 if ( $i_set->is_not_empty ) {
@@ -162,7 +162,7 @@ sub execute {
                 if $opt->{verbose};
             my $merge_set = AlignDB::IntSpan->new;
             for my $range ( @{$c} ) {
-                my $set = $info_of_range->{$range}{intspan};
+                my $set = $info_of->{$range}{intspan};
                 $merge_set->merge($set);
             }
 
