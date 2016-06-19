@@ -34,10 +34,24 @@ sub read_lines {
 
 sub sort_links {
     my $lines_ref = shift;
-    my $info_of   = shift;
     my $numeric   = shift;
 
     my @lines = @{$lines_ref};
+
+    #----------------------------#
+    # Cache info
+    #----------------------------#
+    my $info_of   = {};
+    for my $line (@lines) {
+        for my $part ( split /\t/, $line ) {
+            my $info = App::RL::Common::decode_header($part);
+            next unless App::RL::Common::info_is_valid($info);
+
+            if ( !exists $info_of->{$part} ) {
+                $info_of->{$part} = $info;
+            }
+        }
+    }
 
     #----------------------------#
     # Sort within links

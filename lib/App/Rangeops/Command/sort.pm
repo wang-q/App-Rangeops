@@ -51,7 +51,6 @@ sub execute {
     # Loading
     #----------------------------#
     my @lines;
-    my $info_of = {};
     for my $file ( @{$args} ) {
         for my $line ( App::Rangeops::Common::read_lines($file) ) {
             for my $part ( split /\t/, $line ) {
@@ -59,9 +58,6 @@ sub execute {
                 next unless App::RL::Common::info_is_valid($info);
 
                 push @lines, $line;    # May produce duplicated lines
-                if ( !exists $info_of->{$part} ) {
-                    $info_of->{$part} = $info;
-                }
             }
         }
     }
@@ -70,8 +66,8 @@ sub execute {
     #----------------------------#
     # Sort
     #----------------------------#
-    my @sorted_lines = @{ App::Rangeops::Common::sort_links( \@lines, $info_of,
-            $opt->{numeric} ) };
+    my @sorted_lines
+        = @{ App::Rangeops::Common::sort_links( \@lines, $opt->{numeric} ) };
 
     #----------------------------#
     # Output
