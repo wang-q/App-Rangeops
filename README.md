@@ -36,6 +36,16 @@ Types of links:
 
 - Multilateral links
 
+Steps:
+
+    sort
+      |
+      v
+    clean <-- merge
+      |
+      v
+    connect
+
 # AUTHOR
 
 Qiang Wang &lt;wang-q@outlook.com>

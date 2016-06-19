@@ -49,6 +49,16 @@ Types of links:
 
 =back
 
+Steps:
+
+    sort
+      |
+      v
+    clean <-- merge
+      |
+      v
+    connect
+
 =head1 AUTHOR
 
 Qiang Wang <wang-q@outlook.com>
