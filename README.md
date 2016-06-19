@@ -12,10 +12,11 @@ App::Rangeops - operates ranges and links of ranges on chromosomes
 
     Available commands:
 
-    commands: list the application's commands
-        help: display a command's help screen
+      commands: list the application's commands
+          help: display a command's help screen
 
-       merge: merge runlist yaml files
+         merge: merge overlapped ranges via overlapping graph
+          sort: sort range links
 
 See `rangeops commands` for usage information.
 

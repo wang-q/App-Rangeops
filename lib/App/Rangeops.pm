@@ -2,6 +2,8 @@ package App::Rangeops;
 
 our $VERSION = '0.0.2';
 
+use strict;
+use warnings;
 use App::Cmd::Setup -app;
 
 1;
@@ -15,14 +17,15 @@ App::Rangeops - operates ranges and links of ranges on chromosomes
 =head1 SYNOPSIS
 
     rangeops <command> [-?h] [long options...]
-    	-? -h --help    show help
+        -? -h --help    show help
 
     Available commands:
 
-    commands: list the application's commands
-        help: display a command's help screen
+      commands: list the application's commands
+          help: display a command's help screen
 
-       merge: merge runlist yaml files
+         merge: merge overlapped ranges via overlapping graph
+          sort: sort range links
 
 See C<rangeops commands> for usage information.
 
