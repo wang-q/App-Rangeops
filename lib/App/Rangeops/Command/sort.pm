@@ -67,6 +67,9 @@ sub execute {
     }
     @lines = List::MoreUtils::PP::uniq(@lines);
 
+    #----------------------------#
+    # Sort
+    #----------------------------#
     my @sorted_lines = @{ App::Rangeops::Common::sort_links( \@lines, $info_of,
             $opt->{numeric} ) };
 

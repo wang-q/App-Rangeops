@@ -47,6 +47,12 @@ Types of links:
 
 =item Multilateral links
 
+    II(+):186984-190356	IX(+):12652-16010	X(+):12635-15993
+
+=item Merge files aren't links
+
+    I(-):13327-17227	I(+):13327-17227
+
 =back
 
 Steps:
