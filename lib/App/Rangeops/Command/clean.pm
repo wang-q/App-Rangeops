@@ -1,4 +1,4 @@
-package App::Rangeops::Command::replace;
+package App::Rangeops::Command::clean;
 use strict;
 use warnings;
 use autodie;
@@ -7,7 +7,7 @@ use App::Rangeops -command;
 use App::Rangeops::Common;
 
 use constant abstract =>
-    'replace ranges within links and incorporate hit strands';
+    'replace ranges within links, incorporate hit strands and remove nested links';
 
 sub opt_spec {
     return (
@@ -19,14 +19,14 @@ sub opt_spec {
 }
 
 sub usage_desc {
-    return "rangeops sort [options] <infile> <merge.tsv>";
+    return "rangeops clean [options] <infiles>";
 }
 
 sub description {
     my $desc;
     $desc .= ucfirst(abstract) . ".\n";
     $desc
-        .= "\t<infiles> are bi/multilaterial links files, with or without hit strands\n";
+        .= "\t<infiles> are bilaterial links files, with or without hit strands\n";
     return $desc;
 }
 
@@ -58,16 +58,16 @@ sub execute {
     #----------------------------#
     # Loading
     #----------------------------#
-    my $info_of_range = {};
-    my $replace       = {};
+    my $info_of = {};    # info of ranges
+    my $replace = {};
     if ( $opt->{replace} ) {
         for my $line ( App::Rangeops::Common::read_lines( $opt->{replace} ) ) {
             my @parts = split /\t/, $line;
             if ( @parts == 2 ) {
                 $replace->{ $parts[0] } = $parts[1];
                 for my $part (@parts) {
-                    if ( !exists $info_of_range->{$part} ) {
-                        $info_of_range->{$part}
+                    if ( !exists $info_of->{$part} ) {
+                        $info_of->{$part}
                             = App::RL::Common::decode_header($part);
                     }
                 }
@@ -86,8 +86,8 @@ sub execute {
         for my $part ( split /\t/, $line ) {
 
             # valid or invalid parts
-            if ( !exists $info_of_range->{$part} ) {
-                $info_of_range->{$part} = App::RL::Common::decode_header($part);
+            if ( !exists $info_of->{$part} ) {
+                $info_of->{$part} = App::RL::Common::decode_header($part);
             }
 
             if ( exists $replace->{$part} ) {
@@ -96,10 +96,10 @@ sub execute {
 
                 # create new hash from reference
                 # don't touch anything of $info_of_range
-                my %new = %{ $info_of_range->{$replaced} };
-                $new{strand} = $info_of_range->{$original}{strand};
+                my %new = %{ $info_of->{$replaced} };
+                $new{strand} = $info_of->{$original}{strand};
 
-                my $new_part = App::RL::Common::encode_header( \%new );
+                my $new_part = App::RL::Common::encode_header( \%new, 1 );
                 push @new_parts, $new_part;
             }
             else {
@@ -109,20 +109,26 @@ sub execute {
         my $new_line = join "\t", @new_parts;
 
         # incorporating
-        if ( @new_parts == 3 ) {
-            my $info_0 = $info_of_range->{ $new_parts[0] };
-            my $info_1 = $info_of_range->{ $new_parts[1] };
+        if ( @new_parts == 3 or @new_parts == 2 ) {
+            my $info_0 = $info_of->{ $new_parts[0] };
+            my $info_1 = $info_of->{ $new_parts[1] };
 
             if (    App::RL::Common::info_is_valid($info_0)
                 and App::RL::Common::info_is_valid($info_1) )
             {
-                my $third = pop @new_parts;    # now @new_parts == 2
+                my @strands;
 
-                if ( $third eq "+" or $third eq "-" ) {
+                if ( @new_parts == 3 ) {
+                    if ( $new_parts[2] eq "+" or $new_parts[2] eq "-" ) {
+                        push @strands, pop(@new_parts);    # new @new_parts == 2
+                    }
+                }
+
+                if ( @new_parts == 2 ) {
+
                     my %new_0 = %{$info_0};
                     my %new_1 = %{$info_1};
 
-                    my @strands = ($third);
                     push @strands, $new_0{strand};
                     push @strands, $new_1{strand};
 
@@ -136,10 +142,12 @@ sub execute {
                         $new_1{strand} = "-";
                     }
 
-                    @new_parts = (
-                        App::RL::Common::encode_header( \%new_0 ),
-                        App::RL::Common::encode_header( \%new_1 )
-                    );
+                    my $range_0 = App::RL::Common::encode_header( \%new_0, 1 );
+                    $info_of->{$range_0} = \%new_0;
+                    my $range_1 = App::RL::Common::encode_header( \%new_1, 1 );
+                    $info_of->{$range_1} = \%new_1;
+
+                    @new_parts = ( $range_0, $range_1 );
                     $new_line = join "\t", @new_parts;
                 }
             }
@@ -147,8 +155,8 @@ sub execute {
 
         # skip identical ranges
         if ( @new_parts == 2 ) {
-            my $info_0 = $info_of_range->{ $new_parts[0] };
-            my $info_1 = $info_of_range->{ $new_parts[1] };
+            my $info_0 = $info_of->{ $new_parts[0] };
+            my $info_1 = $info_of->{ $new_parts[1] };
 
             if (    App::RL::Common::info_is_valid($info_0)
                 and App::RL::Common::info_is_valid($info_1) )
@@ -165,6 +173,56 @@ sub execute {
         push @lines, $new_line;
     }
     @lines = grep {defined} List::MoreUtils::PP::uniq(@lines);
+
+    #----------------------------#
+    # Remove nested links
+    #----------------------------#
+    # now all @lines (links) are without hit strands
+    my %to_remove;
+    my $vicinity = 5;
+    for my $idx ( 0 .. $#lines - $vicinity ) {
+
+        for my $i ( 0 .. $vicinity - 1 ) {
+            for my $j ( $i .. $vicinity - 1 ) {
+                my $line_i = $lines[ $idx + $i ];
+                my ( $range0_i, $range1_i ) = split /\t/, $line_i;
+
+                my $line_j = $lines[ $idx + $j ];
+                my ( $range0_j, $range1_j ) = split /\t/, $line_j;
+
+                next
+                    if $info_of->{$range0_i}{chr} ne $info_of->{$range0_j}{chr};
+                next
+                    if $info_of->{$range1_i}{chr} ne $info_of->{$range1_j}{chr};
+
+                my $intspan0_i = AlignDB::IntSpan->new;
+                $intspan0_i->add_pair( $info_of->{$range0_i}{start},
+                    $info_of->{$range0_i}{end} );
+                my $intspan1_i = AlignDB::IntSpan->new;
+                $intspan1_i->add_pair( $info_of->{$range1_i}{start},
+                    $info_of->{$range1_i}{end} );
+
+                my $intspan0_j = AlignDB::IntSpan->new;
+                $intspan0_j->add_pair( $info_of->{$range0_j}{start},
+                    $info_of->{$range0_j}{end} );
+                my $intspan1_j = AlignDB::IntSpan->new;
+                $intspan1_j->add_pair( $info_of->{$range1_j}{start},
+                    $info_of->{$range1_j}{end} );
+
+                if (    $intspan0_i->larger_than($intspan0_j)
+                    and $intspan1_i->larger_than($intspan1_j) )
+                {
+                    $to_remove{$line_j}++;
+                }
+                elsif ( $intspan0_j->larger_than($intspan0_i)
+                    and $intspan1_j->larger_than($intspan1_i) )
+                {
+                    $to_remove{$line_i}++;
+                }
+            }
+        }
+    }
+    @lines = grep { !exists $to_remove{$_} } @lines;
 
     #----------------------------#
     # Output
