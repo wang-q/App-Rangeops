@@ -9,9 +9,7 @@ use App::Cmd::Setup -app;
 # TODO: nest (java)
 #   remove locations fully contained by others. egas/blastn_genome.pl
 # TODO: bundle links
-# TODO: filter
-#   * difference of lengthes. egas/proc_cc_chop.pl
-#   * copy numbers.
+# TODO: circos
 
 1;
 
