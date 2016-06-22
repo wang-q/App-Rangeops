@@ -39,14 +39,12 @@
          "requires" : {
             "AlignDB::IntSpan" : "v1.0.7",
             "App::Cmd" : "0.330",
-            "App::RL" : "v0.2.23",
+            "App::RL" : "v0.2.25",
             "Graph" : "0",
-            "IO::Zlib" : "0",
             "IPC::Cmd" : "0",
             "List::MoreUtils" : "0.413",
             "MCE" : "1.708",
             "Path::Tiny" : "0.076",
-            "Tie::IxHash" : "1.23",
             "YAML::Syck" : "1.29",
             "perl" : "5.010001"
          }
@@ -69,6 +67,6 @@
          "web" : "https://github.com/wang-q/App-Rangeops"
       }
    },
-   "version" : "0.0.5"
+   "version" : "0.0.6"
 }
 
