@@ -30,6 +30,8 @@ cat t/II.sort.tsv \
 
 perl -I lib/ script/rangeops connect t/II.clean.tsv -v -o t/II.connect.tsv
 
+perl -I lib/ script/rangeops filter t/II.connect.tsv -n 2 -o stdout
+
 # S288c chr II
 perl -I lib/ script/rangeops merge t/II.lastz.tsv t/II.blast.tsv -o stdout \
     > t/II.merge.tsv

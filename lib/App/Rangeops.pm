@@ -71,6 +71,9 @@ Steps:
       |
       v
     connect
+      |
+      v
+    filter
 
 =head1 AUTHOR
 
