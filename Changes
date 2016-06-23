@@ -2,6 +2,9 @@ Revision history for App-Rangeops
 
 {{$NEXT}}
 
+0.0.8  2016-06-24 03:36:08 CST
+    - Command circos
+
 0.0.7  2016-06-23 02:28:24 CST
     - Command filter
 
