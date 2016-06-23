@@ -16,7 +16,7 @@ sub opt_spec {
 }
 
 sub usage_desc {
-    return "rangeops filter [options] <infiles>";
+    return "rangeops circos [options] <infiles>";
 }
 
 sub description {
@@ -41,7 +41,7 @@ sub validate_args {
 
     if ( !exists $opt->{outfile} ) {
         $opt->{outfile}
-            = Path::Tiny::path( $args->[0] )->absolute . ".filter.tsv";
+            = Path::Tiny::path( $args->[0] )->absolute . ".links.txt";
     }
 }
 
