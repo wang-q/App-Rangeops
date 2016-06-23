@@ -9,62 +9,6 @@ use App::Cmd::Setup -app;
 # TODO: nest (java)
 #   remove locations fully contained by others. egas/blastn_genome.pl
 # TODO: bundle links
-# TODO: circos
-#
-##----------------------------#
-## write circos link files
-##----------------------------#
-#{
-#    print "Write circos link files\n";
-#
-#    # linkN is actually hightlight file
-#    my $link_fh_of = {};
-#    for ( 2 .. $low_cut, 'N' ) {
-#        open my $fh, ">", "$output.cc.link$_.txt";
-#        $link_fh_of->{$_} = $fh;
-#    }
-#
-#    my @colors = reverse map {"paired-12-qual-$_"} ( 1 .. 12 );
-#    my $color_idx = 0;
-#    for my $c (@cc) {
-#        my $copy = scalar @{$c};
-#        next if $copy < 2;
-#
-#        if ( $copy > $low_cut ) {
-#            for ( @{$c} ) {
-#                my ( $chr, $set, $strand ) = string_to_set($_);
-#                print { $link_fh_of->{N} }
-#                    join( " ", $chr, $set->min, $set->max, "fill_color=" . $colors[$color_idx] ),
-#                    "\n";
-#            }
-#
-#            # rotate color
-#            $color_idx++;
-#            $color_idx = 0 if $color_idx > 11;
-#            next;
-#        }
-#
-#        for my $idx1 ( 0 .. $copy - 1 ) {
-#            for my $idx2 ( $idx1 + 1 .. $copy - 1 ) {
-#                my @fields;
-#                for ( $idx1, $idx2 ) {
-#                    my ( $chr, $set, $strand ) = string_to_set( $c->[$_] );
-#                    push @fields,
-#                        (
-#                            $chr, $strand eq "+"
-#                                ? ( $set->min, $set->max )
-#                                : ( $set->max, $set->min )
-#                        );
-#                }
-#                print { $link_fh_of->{$copy} } join( " ", @fields ), "\n";
-#            }
-#        }
-#    }
-#
-#    close $link_fh_of->{$_} for ( 2 .. $low_cut, 'N' );
-#    print "\n";
-#}
-
 
 1;
 
