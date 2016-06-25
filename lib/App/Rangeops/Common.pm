@@ -7,12 +7,14 @@ use 5.010001;
 
 use Carp;
 use Graph;
+use IPC::Cmd;
 use List::MoreUtils;
 use Path::Tiny;
 use YAML::Syck;
 
 use AlignDB::IntSpan;
 use App::RL::Common;
+use App::Fasops::Common;
 
 sub build_info {
     my $line_refs = shift;
@@ -45,7 +47,7 @@ sub sort_links {
     #----------------------------#
     # Cache info
     #----------------------------#
-    my $info_of =  build_info( \@lines );
+    my $info_of = build_info( \@lines );
 
     #----------------------------#
     # Sort within links
@@ -133,6 +135,37 @@ sub sort_links {
     }
 
     return \@lines;
+}
+
+sub get_seq_faidx {
+    my $filename = shift;
+    my $location = shift;    # I:1-100
+
+    # get executable
+    my $bin;
+    for my $e (qw{samtools}) {
+        if ( IPC::Cmd::can_run($e) ) {
+            $bin = $e;
+            last;
+        }
+    }
+    if ( !defined $bin ) {
+        confess "Could not find the executable for [samtools]\n";
+    }
+
+    my $cmd = sprintf "%s faidx %s %s", $bin, $filename, $location;
+    open my $pipe_fh, '-|', $cmd;
+
+    my $seq;
+    while ( my $line = <$pipe_fh> ) {
+        chomp $line;
+        if ( $line =~ /^[\w-]+/ ) {
+            $seq .= $line;
+        }
+    }
+    close $pipe_fh;
+
+    return $seq;
 }
 
 1;
