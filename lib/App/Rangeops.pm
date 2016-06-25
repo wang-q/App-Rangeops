@@ -70,9 +70,13 @@ Steps:
     sort
       |
       v
-    clean <-- merge
-      |
+    clean -> merge
+      |     /
+      |  /
       v
+    clean
+      |
+      V
     connect
       |
       v

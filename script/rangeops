@@ -24,6 +24,7 @@ cat t/II.links.tsv \
     | perl -I lib/ script/rangeops merge stdin -o t/II.merge.tsv
 
 perl -I lib/ script/rangeops clean t/II.sort.tsv -o stdout
+perl -I lib/ script/rangeops clean t/II.sort.tsv --bundle 500 -o stdout
 perl -I lib/ script/rangeops clean t/II.sort.tsv -r t/II.merge.tsv -o stdout
 cat t/II.sort.tsv \
     | perl -I lib/ script/rangeops clean stdin -r t/II.merge.tsv -o t/II.clean.tsv
@@ -43,20 +44,29 @@ perl -I lib/ script/rangeops create xt/I.connect.tsv -g xt/genome.fa -o stdout
 perl -I lib/ script/rangeops sort S288c/links.lastz.tsv S288c/links.blast.tsv \
     -o S288c/sort.tsv
 
-perl -I lib/ script/rangeops merge S288c/sort.tsv \
+perl -I lib/ script/rangeops clean S288c/sort.tsv \
+    -o S288c/sort.clean.tsv
+
+perl -I lib/ script/rangeops merge S288c/sort.clean.tsv -c 0.95 \
     -o S288c/merge.tsv
 
-perl -I lib/ script/rangeops clean S288c/sort.tsv -r S288c/merge.tsv \
+perl -I lib/ script/rangeops clean S288c/sort.clean.tsv -r S288c/merge.tsv --bundle 500 \
     -o S288c/clean.tsv
 
-perl -I lib/ script/rangeops connect S288c/clean.tsv -o S288c/connect.tsv
+perl -I lib/ script/rangeops connect S288c/clean.tsv -r 0.8 \
+    -o S288c/connect.tsv
+
+perl -I lib/ script/rangeops filter S288c/connect.tsv -r 0.8 \
+    -o S288c/filter.tsv
 
 wc -l S288c/*.tsv
-     262 S288c/clean.tsv
+     231 S288c/clean.tsv
      150 S288c/connect.tsv
+     150 S288c/filter.tsv
      566 S288c/links.blast.tsv
      346 S288c/links.lastz.tsv
-     132 S288c/merge.tsv
+      74 S288c/merge.tsv
+     282 S288c/sort.clean.tsv
      626 S288c/sort.tsv
 
 cat S288c/connect.tsv \
@@ -64,26 +74,33 @@ cat S288c/connect.tsv \
     | runlist cover stdin -o S288c/cover.yml
 
 runlist stat --size S288c/chr.sizes S288c/cover.yml -o stdout
-perl ~/Scripts/egas/cover_figure.pl --size t/chr.sizes -f S288c/cover.yml
 
 # Atha
 perl -I lib/ script/rangeops sort Atha/links.lastz.tsv Atha/links.blast.tsv \
     -o Atha/sort.tsv
 
-perl -I lib/ script/rangeops merge Atha/sort.tsv \
+perl -I lib/ script/rangeops clean Atha/sort.tsv \
+    -o Atha/sort.clean.tsv
+
+perl -I lib/ script/rangeops merge Atha/sort.clean.tsv -c 0.95 \
     -o Atha/merge.tsv -p 5
 
-perl -I lib/ script/rangeops clean Atha/sort.tsv -r Atha/merge.tsv \
+perl -I lib/ script/rangeops clean Atha/sort.clean.tsv -r Atha/merge.tsv --bundle 500 \
     -o Atha/clean.tsv
 
 perl -I lib/ script/rangeops connect Atha/clean.tsv -o Atha/connect.tsv
 
+perl -I lib/ script/rangeops filter Atha/connect.tsv -r 0.8 \
+    -o Atha/filter.tsv
+
 wc -l Atha/*.tsv
-    4861 Atha/clean.tsv
-    3903 Atha/connect.tsv
+    4551 Atha/clean.tsv
+    3882 Atha/connect.tsv
+    3882 Atha/filter.tsv
     3894 Atha/links.blast.tsv
     6830 Atha/links.lastz.tsv
-    2076 Atha/merge.tsv
+     785 Atha/merge.tsv
+    5416 Atha/sort.clean.tsv
     7754 Atha/sort.tsv
 
 cat Atha/connect.tsv \

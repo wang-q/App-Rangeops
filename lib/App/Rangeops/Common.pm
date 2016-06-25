@@ -38,6 +38,28 @@ sub build_info {
     return $info_of;
 }
 
+sub build_info_intspan {
+    my $line_refs = shift;
+
+    my $info_of   = {};
+
+    for my $line ( @{$line_refs} ) {
+        for my $part ( split /\t/, $line ) {
+            my $info = App::RL::Common::decode_header($part);
+            next unless App::RL::Common::info_is_valid($info);
+
+            $info->{intspan} = AlignDB::IntSpan->new;
+            $info->{intspan}->add_pair( $info->{start}, $info->{end} );
+
+            if ( !exists $info_of->{$part} ) {
+                $info_of->{$part} = $info;
+            }
+        }
+    }
+
+    return $info_of;
+}
+
 sub sort_links {
     my $line_refs = shift;
     my $numeric   = shift;

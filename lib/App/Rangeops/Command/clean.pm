@@ -14,7 +14,12 @@ sub opt_spec {
         [   "replace|r=s",
             "Two-column tsv file, normally produced by command merge."
         ],
+        [   "bundle|b=i",
+            "Bundle overlapped links. This value is the overlapping size, default is [0]. Suggested value is [500].",
+            { default => 0 },
+        ],
         [ "outfile|o=s", "Output filename. [stdout] for screen." ],
+        [ "verbose|v",   "Verbose mode.", ],
     );
 }
 
@@ -61,6 +66,7 @@ sub execute {
     my $info_of    = {};    # info of ranges
     my $replace_of = {};
     if ( $opt->{replace} ) {
+        print STDERR "==> Load replaces\n" if $opt->{verbose};
         for my $line ( App::RL::Common::read_lines( $opt->{replace} ) ) {
             $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
 
@@ -74,6 +80,7 @@ sub execute {
     #----------------------------#
     # Replacing and incorporating
     #----------------------------#
+    print STDERR "==> Incorporating strands\n" if $opt->{verbose};
     my @lines;
     for my $line ( App::RL::Common::read_lines( $args->[0] ) ) {
         $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
@@ -168,71 +175,135 @@ sub execute {
         push @lines, $new_line;
     }
     @lines = grep {defined} List::MoreUtils::PP::uniq(@lines);
-    $info_of = App::Rangeops::Common::build_info( \@lines, $info_of );
+    @lines = @{ App::Rangeops::Common::sort_links( \@lines ) };
+    $info_of = App::Rangeops::Common::build_info_intspan( \@lines );
 
     #----------------------------#
     # Remove nested links
     #----------------------------#
     # now all @lines (links) are without hit strands
-    my $flag_clean = 1;
-    while ($flag_clean) {
+    my $flag_nest = 1;
+    while ($flag_nest) {
+        print STDERR "==> Remove nested links\n" if $opt->{verbose};
+
         my %to_remove = ();
-        my $vicinity  = 5;
-        for my $idx ( 0 .. $#lines - $vicinity ) {
+        my @chr_pairs = map {
+            my ( $r0, $r1 ) = split /\t/;
+            $info_of->{$r0}{chr} . ":" . $info_of->{$r1}{chr}
+        } @lines;
+        for my $i ( 0 .. $#lines - 1 ) {
+            my @rest_idx
+                = grep { $chr_pairs[$i] eq $chr_pairs[$_] } $i + 1 .. $#lines;
 
-            for my $i ( 0 .. $vicinity - 1 ) {
-                for my $j ( $i .. $vicinity - 1 ) {
-                    my $line_i = $lines[ $idx + $i ];
-                    my ( $range0_i, $range1_i ) = split /\t/, $line_i;
+            for my $j (@rest_idx) {
+                my $line_i = $lines[$i];
+                my ( $range0_i, $range1_i ) = split /\t/, $line_i;
 
-                    my $line_j = $lines[ $idx + $j ];
-                    my ( $range0_j, $range1_j ) = split /\t/, $line_j;
+                my $line_j = $lines[$j];
+                my ( $range0_j, $range1_j ) = split /\t/, $line_j;
 
-                    next
-                        if $info_of->{$range0_i}{chr} ne
-                        $info_of->{$range0_j}{chr};
-                    next
-                        if $info_of->{$range1_i}{chr} ne
-                        $info_of->{$range1_j}{chr};
+                my $intspan0_i = $info_of->{$range0_i}{intspan};
+                my $intspan1_i = $info_of->{$range1_i}{intspan};
 
-                    my $intspan0_i = AlignDB::IntSpan->new;
-                    $intspan0_i->add_pair(
-                        $info_of->{$range0_i}{start},
-                        $info_of->{$range0_i}{end}
-                    );
-                    my $intspan1_i = AlignDB::IntSpan->new;
-                    $intspan1_i->add_pair(
-                        $info_of->{$range1_i}{start},
-                        $info_of->{$range1_i}{end}
-                    );
+                my $intspan0_j = $info_of->{$range0_j}{intspan};
+                my $intspan1_j = $info_of->{$range1_j}{intspan};
 
-                    my $intspan0_j = AlignDB::IntSpan->new;
-                    $intspan0_j->add_pair(
-                        $info_of->{$range0_j}{start},
-                        $info_of->{$range0_j}{end}
-                    );
-                    my $intspan1_j = AlignDB::IntSpan->new;
-                    $intspan1_j->add_pair(
-                        $info_of->{$range1_j}{start},
-                        $info_of->{$range1_j}{end}
-                    );
-
-                    if (    $intspan0_i->larger_than($intspan0_j)
-                        and $intspan1_i->larger_than($intspan1_j) )
-                    {
-                        $to_remove{$line_j}++;
-                    }
-                    elsif ( $intspan0_j->larger_than($intspan0_i)
-                        and $intspan1_j->larger_than($intspan1_i) )
-                    {
-                        $to_remove{$line_i}++;
-                    }
+                if (    $intspan0_i->superset($intspan0_j)
+                    and $intspan1_i->superset($intspan1_j) )
+                {
+                    $to_remove{$line_j}++;
+                }
+                elsif ( $intspan0_j->superset($intspan0_i)
+                    and $intspan1_j->superset($intspan1_i) )
+                {
+                    $to_remove{$line_i}++;
                 }
             }
         }
         @lines = grep { !exists $to_remove{$_} } @lines;
-        $flag_clean
-            = scalar keys %to_remove;    # when no lines to remove, end loop
+        $flag_nest = scalar keys %to_remove; # when no lines to remove, end loop
+    }
+    @lines = @{ App::Rangeops::Common::sort_links( \@lines ) };
+
+    if ( $opt->{bundle} ) {
+        print STDERR "==> Bundle overlapped links\n" if $opt->{verbose};
+        my @chr_strand_pairs = map {
+            my ( $r0, $r1 ) = split /\t/;
+            $info_of->{$r0}{chr} . ":"
+                . $info_of->{$r0}{strand} . ":"
+                . $info_of->{$r1}{chr} . ":"
+                . $info_of->{$r1}{strand}
+        } @lines;
+        my $graph = Graph->new( directed => 0 );    # graph of lines
+
+        for my $i ( 0 .. $#lines - 1 ) {
+            my @rest_idx
+                = grep { $chr_strand_pairs[$i] eq $chr_strand_pairs[$_] }
+                $i + 1 .. $#lines;
+
+            for my $j (@rest_idx) {
+                my $line_i = $lines[$i];
+                my ( $range0_i, $range1_i ) = split /\t/, $line_i;
+
+                my $line_j = $lines[$j];
+                my ( $range0_j, $range1_j ) = split /\t/, $line_j;
+
+                if ( !$graph->has_vertex($line_i) ) {
+                    $graph->add_vertex($line_i);
+                }
+                if ( !$graph->has_vertex($line_j) ) {
+                    $graph->add_vertex($line_j);
+                }
+
+                my $intspan0_i = $info_of->{$range0_i}{intspan};
+                my $intspan1_i = $info_of->{$range1_i}{intspan};
+
+                my $intspan0_j = $info_of->{$range0_j}{intspan};
+                my $intspan1_j = $info_of->{$range1_j}{intspan};
+
+                if (    $intspan0_i->overlap($intspan0_j) >= $opt->{bundle}
+                    and $intspan1_i->overlap($intspan1_j) >= $opt->{bundle} )
+                {
+                    $graph->add_edge( $line_i, $line_j );
+                }
+            }
+        }
+
+        # bundle connected lines
+        my @cc = grep { scalar @{$_} > 1 } $graph->connected_components;
+        for my $c (@cc) {
+            printf "\n" . " " x 4 . "Merge %s lines\n", scalar @{$c}
+                if $opt->{verbose};
+
+            my @merged_range;
+
+            for my $i ( 0, 1 ) {
+                my ( $chr, $strand );
+                my $merge_intspan = AlignDB::IntSpan->new;
+
+                for my $line ( @{$c} ) {
+                    @lines = grep {$_ ne $line} @lines;
+                    my $range = ( split /\t/, $line )[$i];
+                    $chr    = $info_of->{$range}{chr};
+                    $strand = $info_of->{$range}{strand};
+                    $merge_intspan->merge( $info_of->{$range}{intspan} );
+                }
+
+                $merged_range[$i] = App::RL::Common::encode_header(
+                    {   chr    => $chr,
+                        strand => $strand,
+                        start  => $merge_intspan->min,
+                        end    => $merge_intspan->max,
+                    }
+                );
+            }
+
+            my $line = join "\t", @merged_range;
+            push @lines, $line;
+            print STDERR " " x 8 . "$line\n" if $opt->{verbose};
+        }
+
+        @lines = @{ App::Rangeops::Common::sort_links( \@lines ) };
     }
 
     #----------------------------#
