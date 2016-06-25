@@ -11,10 +11,7 @@ use constant abstract => 'create blocked fas files from range links';
 sub opt_spec {
     return (
         [ "outfile|o=s", "Output filename. [stdout] for screen." ],
-        [   "genome|g=s",
-            "Reference genome file, bgzipped file is accepted.",
-            { required => 1 },
-        ],
+        [ "genome|g=s", "Reference genome file.", { required => 1 }, ],
     );
 }
 
