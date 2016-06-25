@@ -15,9 +15,10 @@ App::Rangeops - operates ranges and links of ranges on chromosomes
       commands: list the application's commands
           help: display a command's help screen
 
-        circos: Range links to circos links or highlight file
+        circos: range links to circos links or highlight file
          clean: replace ranges within links, incorporate hit strands and remove nested links
        connect: connect bilaterial links into multilateral ones
+        create: create blocked fasta files from range links
         filter: filter links by numbers of ranges or length difference
          merge: merge overlapped ranges via overlapping graph
        replace: replace ranges within links and incorporate hit strands
@@ -52,9 +53,13 @@ Steps:
     sort
       |
       v
-    clean <-- merge
-      |
+    clean -> merge
+      |     /
+      |  /
       v
+    clean
+      |
+      V
     connect
       |
       v

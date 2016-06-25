@@ -2,6 +2,9 @@ Revision history for App-Rangeops
 
 {{$NEXT}}
 
+0.0.10  2016-06-26 07:29:30 CST
+    - Add --bundle to command clean
+
 0.0.9  2016-06-25 23:28:28 CST
     - Command create
 
