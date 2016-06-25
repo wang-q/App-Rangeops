@@ -174,51 +174,66 @@ sub execute {
     # Remove nested links
     #----------------------------#
     # now all @lines (links) are without hit strands
-    my %to_remove;
-    my $vicinity = 5;
-    for my $idx ( 0 .. $#lines - $vicinity ) {
+    my $flag_clean = 1;
+    while ($flag_clean) {
+        my %to_remove = ();
+        my $vicinity  = 5;
+        for my $idx ( 0 .. $#lines - $vicinity ) {
 
-        for my $i ( 0 .. $vicinity - 1 ) {
-            for my $j ( $i .. $vicinity - 1 ) {
-                my $line_i = $lines[ $idx + $i ];
-                my ( $range0_i, $range1_i ) = split /\t/, $line_i;
+            for my $i ( 0 .. $vicinity - 1 ) {
+                for my $j ( $i .. $vicinity - 1 ) {
+                    my $line_i = $lines[ $idx + $i ];
+                    my ( $range0_i, $range1_i ) = split /\t/, $line_i;
 
-                my $line_j = $lines[ $idx + $j ];
-                my ( $range0_j, $range1_j ) = split /\t/, $line_j;
+                    my $line_j = $lines[ $idx + $j ];
+                    my ( $range0_j, $range1_j ) = split /\t/, $line_j;
 
-                next
-                    if $info_of->{$range0_i}{chr} ne $info_of->{$range0_j}{chr};
-                next
-                    if $info_of->{$range1_i}{chr} ne $info_of->{$range1_j}{chr};
+                    next
+                        if $info_of->{$range0_i}{chr} ne
+                        $info_of->{$range0_j}{chr};
+                    next
+                        if $info_of->{$range1_i}{chr} ne
+                        $info_of->{$range1_j}{chr};
 
-                my $intspan0_i = AlignDB::IntSpan->new;
-                $intspan0_i->add_pair( $info_of->{$range0_i}{start},
-                    $info_of->{$range0_i}{end} );
-                my $intspan1_i = AlignDB::IntSpan->new;
-                $intspan1_i->add_pair( $info_of->{$range1_i}{start},
-                    $info_of->{$range1_i}{end} );
+                    my $intspan0_i = AlignDB::IntSpan->new;
+                    $intspan0_i->add_pair(
+                        $info_of->{$range0_i}{start},
+                        $info_of->{$range0_i}{end}
+                    );
+                    my $intspan1_i = AlignDB::IntSpan->new;
+                    $intspan1_i->add_pair(
+                        $info_of->{$range1_i}{start},
+                        $info_of->{$range1_i}{end}
+                    );
 
-                my $intspan0_j = AlignDB::IntSpan->new;
-                $intspan0_j->add_pair( $info_of->{$range0_j}{start},
-                    $info_of->{$range0_j}{end} );
-                my $intspan1_j = AlignDB::IntSpan->new;
-                $intspan1_j->add_pair( $info_of->{$range1_j}{start},
-                    $info_of->{$range1_j}{end} );
+                    my $intspan0_j = AlignDB::IntSpan->new;
+                    $intspan0_j->add_pair(
+                        $info_of->{$range0_j}{start},
+                        $info_of->{$range0_j}{end}
+                    );
+                    my $intspan1_j = AlignDB::IntSpan->new;
+                    $intspan1_j->add_pair(
+                        $info_of->{$range1_j}{start},
+                        $info_of->{$range1_j}{end}
+                    );
 
-                if (    $intspan0_i->larger_than($intspan0_j)
-                    and $intspan1_i->larger_than($intspan1_j) )
-                {
-                    $to_remove{$line_j}++;
-                }
-                elsif ( $intspan0_j->larger_than($intspan0_i)
-                    and $intspan1_j->larger_than($intspan1_i) )
-                {
-                    $to_remove{$line_i}++;
+                    if (    $intspan0_i->larger_than($intspan0_j)
+                        and $intspan1_i->larger_than($intspan1_j) )
+                    {
+                        $to_remove{$line_j}++;
+                    }
+                    elsif ( $intspan0_j->larger_than($intspan0_i)
+                        and $intspan1_j->larger_than($intspan1_i) )
+                    {
+                        $to_remove{$line_i}++;
+                    }
                 }
             }
         }
+        @lines = grep { !exists $to_remove{$_} } @lines;
+        $flag_clean
+            = scalar keys %to_remove;    # when no lines to remove, end loop
     }
-    @lines = grep { !exists $to_remove{$_} } @lines;
 
     #----------------------------#
     # Output
