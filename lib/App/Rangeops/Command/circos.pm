@@ -6,7 +6,7 @@ use autodie;
 use App::Rangeops -command;
 use App::Rangeops::Common;
 
-use constant abstract => 'Range links to circos links or highlight file';
+use constant abstract => 'range links to circos links or highlight file';
 
 sub opt_spec {
     return (

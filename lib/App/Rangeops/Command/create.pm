@@ -6,7 +6,7 @@ use autodie;
 use App::Rangeops -command;
 use App::Rangeops::Common;
 
-use constant abstract => 'create blocked fas files from range links';
+use constant abstract => 'create blocked fasta files from range links';
 
 sub opt_spec {
     return (
