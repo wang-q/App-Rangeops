@@ -127,7 +127,7 @@ sub execute {
                 }
             }
         }
-        printf "Gather %d edges\n", scalar @edges if $opt->{verbose};
+        printf STDERR "Gather %d edges\n", scalar @edges if $opt->{verbose};
 
         MCE->gather( $chr, \@edges );
     };
@@ -158,7 +158,7 @@ sub execute {
         @cc = grep { scalar @{$_} > 1 } @cc;
 
         for my $c (@cc) {
-            printf "\n" . " " x 4 . "Merge %s ranges\n", scalar @{$c}
+            printf STDERR "\n" . " " x 4 . "Merge %s ranges\n", scalar @{$c}
                 if $opt->{verbose};
             my $merge_set = AlignDB::IntSpan->new;
             for my $range ( @{$c} ) {
@@ -179,7 +179,7 @@ sub execute {
 
                 my $line = sprintf "%s\t%s", $range, $merge_range;
                 push @lines, $line;
-                print " " x 8 . "$line\n" if $opt->{verbose};
+                print STDERR " " x 8 . "$line\n" if $opt->{verbose};
             }
         }
     }
