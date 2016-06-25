@@ -131,7 +131,9 @@ sub sort_links {
     {
         @lines = map { $_->[0] }
             sort { $b->[1] <=> $a->[1] }
-            map { [ $_, scalar( split /\t/ ) ] } @lines;
+            map {
+            [ $_, scalar( grep { exists $info_of->{$_} } split( /\t/, $_ ) ) ]
+            } @lines;
     }
 
     return \@lines;
