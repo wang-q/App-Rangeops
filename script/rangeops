@@ -60,9 +60,9 @@ perl -I lib/ script/rangeops filter S288c/connect.tsv -r 0.8 \
     -o S288c/filter.tsv
 
 wc -l S288c/*.tsv
-     231 S288c/clean.tsv
-     150 S288c/connect.tsv
-     150 S288c/filter.tsv
+     229 S288c/clean.tsv
+     148 S288c/connect.tsv
+     148 S288c/filter.tsv
      566 S288c/links.blast.tsv
      346 S288c/links.lastz.tsv
       74 S288c/merge.tsv
@@ -94,9 +94,9 @@ perl -I lib/ script/rangeops filter Atha/connect.tsv -r 0.8 \
     -o Atha/filter.tsv
 
 wc -l Atha/*.tsv
-    4551 Atha/clean.tsv
-    3882 Atha/connect.tsv
-    3882 Atha/filter.tsv
+    4500 Atha/clean.tsv
+    3834 Atha/connect.tsv
+    3834 Atha/filter.tsv
     3894 Atha/links.blast.tsv
     6830 Atha/links.lastz.tsv
      785 Atha/merge.tsv

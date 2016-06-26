@@ -40,8 +40,11 @@ sub build_info {
 
 sub build_info_intspan {
     my $line_refs = shift;
+    my $info_of   = shift;
 
-    my $info_of   = {};
+    if ( !defined $info_of ) {
+        $info_of = {};
+    }
 
     for my $line ( @{$line_refs} ) {
         for my $part ( split /\t/, $line ) {

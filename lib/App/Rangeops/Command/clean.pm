@@ -174,8 +174,8 @@ sub execute {
 
         push @lines, $new_line;
     }
-    @lines = grep {defined} List::MoreUtils::PP::uniq(@lines);
-    @lines = @{ App::Rangeops::Common::sort_links( \@lines ) };
+    @lines   = grep {defined} List::MoreUtils::PP::uniq(@lines);
+    @lines   = @{ App::Rangeops::Common::sort_links( \@lines ) };
     $info_of = App::Rangeops::Common::build_info_intspan( \@lines );
 
     #----------------------------#
@@ -225,6 +225,9 @@ sub execute {
     }
     @lines = @{ App::Rangeops::Common::sort_links( \@lines ) };
 
+    #----------------------------#
+    # Bundle links
+    #----------------------------#
     if ( $opt->{bundle} ) {
         print STDERR "==> Bundle overlapped links\n" if $opt->{verbose};
         my @chr_strand_pairs = map {
@@ -282,7 +285,7 @@ sub execute {
                 my $merge_intspan = AlignDB::IntSpan->new;
 
                 for my $line ( @{$c} ) {
-                    @lines = grep {$_ ne $line} @lines;
+                    @lines = grep { $_ ne $line } @lines;
                     my $range = ( split /\t/, $line )[$i];
                     $chr    = $info_of->{$range}{chr};
                     $strand = $info_of->{$range}{strand};
@@ -301,9 +304,41 @@ sub execute {
             my $line = join "\t", @merged_range;
             push @lines, $line;
             print STDERR " " x 8 . "$line\n" if $opt->{verbose};
+
+            # new range introduced, update $info_of
+            $info_of = App::Rangeops::Common::build_info_intspan( [$line],
+                $info_of );
         }
 
         @lines = @{ App::Rangeops::Common::sort_links( \@lines ) };
+    }
+
+    #----------------------------#
+    # Links of nearly identical ranges escaped from merging
+    #----------------------------#
+    if ( $opt->{replace} ) {
+        print STDERR "==> Remove self links\n" if $opt->{verbose};
+
+        my @same_pair_lines = map {
+            my ( $r0, $r1 ) = split /\t/;
+            $info_of->{$r0}{chr} eq $info_of->{$r1}{chr} ? ($_) : ()
+        } @lines;
+
+        for my $line (@same_pair_lines) {
+            my ( $range0, $range1 ) = split /\t/, $line;
+
+            my $intspan0 = $info_of->{$range0}{intspan};
+            my $intspan1 = $info_of->{$range1}{intspan};
+
+            my $intspan_i = $intspan0->intersect($intspan1);
+            if ( $intspan_i->is_not_empty ) {
+                if (    $intspan_i->size / $intspan0->size > 0.5
+                    and $intspan_i->size / $intspan1->size > 0.5 )
+                {
+                    @lines = grep { $_ ne $line } @lines;
+                }
+            }
+        }
     }
 
     #----------------------------#
