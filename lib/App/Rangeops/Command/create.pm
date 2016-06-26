@@ -48,26 +48,6 @@ sub execute {
     my ( $self, $opt, $args ) = @_;
 
     #----------------------------#
-    # Loading
-    #----------------------------#
-    my @links;
-    my $info_of = {};
-    for my $file ( @{$args} ) {
-        for my $line ( App::RL::Common::read_lines($file) ) {
-            my @parts;
-            for my $part ( split /\t/, $line ) {
-                my $info = App::RL::Common::decode_header($part);
-                next unless App::RL::Common::info_is_valid($info);
-
-                push @parts, $part;
-                $info_of->{$part} = $info;
-            }
-            push @links, join( "\t", @parts );
-        }
-    }
-    @links = List::MoreUtils::PP::uniq(@links);
-
-    #----------------------------#
     # Output
     #----------------------------#
     my $out_fh;
@@ -78,21 +58,35 @@ sub execute {
         open $out_fh, ">", $opt->{outfile};
     }
 
-    for my $link (@links) {
-        my @ranges = split /\t/, $link;
-        for my $range (@ranges) {
-            my $info = $info_of->{$range};
-            my $location = sprintf "%s:%d-%d", $info->{chr}, $info->{start},
-                $info->{end};
-            my $seq = App::Rangeops::Common::get_seq_faidx( $opt->{genome},
-                $location );
-            if ( defined $info->{strand} and $info->{strand} ne "+" ) {
-                $seq = App::Fasops::Common::revcom($seq);
+    #----------------------------#
+    # Loading
+    #----------------------------#
+    my $info_of = {};
+    for my $file ( @{$args} ) {
+        for my $line ( App::RL::Common::read_lines($file) ) {
+            $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
+            my @parts;
+            for my $part ( split /\t/, $line ) {
+                next unless exists $info_of->{$part};
+                push @parts, $part;
             }
-            print {$out_fh} ">$range\n";
-            print {$out_fh} "$seq\n";
+            next unless @parts >= 2;
+
+            for my $range (@parts) {
+                my $info = $info_of->{$range};
+                my $location = sprintf "%s:%d-%d", $info->{chr}, $info->{start},
+                    $info->{end};
+                my $seq = App::Rangeops::Common::get_seq_faidx( $opt->{genome},
+                    $location );
+                if ( defined $info->{strand} and $info->{strand} ne "+" ) {
+                    $seq = App::Fasops::Common::revcom($seq);
+                }
+                print {$out_fh} ">$range\n";
+                print {$out_fh} "$seq\n";
+            }
+            print {$out_fh} "\n";
+
         }
-        print {$out_fh} "\n";
     }
 
     close $out_fh;
