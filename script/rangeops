@@ -39,6 +39,7 @@ perl -I lib/ script/rangeops circos t/II.connect.tsv -l -o stdout
 cat ~/data/alignment/Ensembl/S288c/I.fa > xt/genome.fa
 samtools faidx xt/genome.fa
 perl -I lib/ script/rangeops create xt/I.connect.tsv -g xt/genome.fa -o stdout
+perl -I lib/ script/rangeops create xt/I.connect.tsv -g xt/genome.fa --name S288c -o stdout
 
 # S288c
 perl -I lib/ script/rangeops sort S288c/links.lastz.tsv S288c/links.blast.tsv \

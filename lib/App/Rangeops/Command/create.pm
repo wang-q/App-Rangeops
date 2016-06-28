@@ -12,6 +12,7 @@ sub opt_spec {
     return (
         [ "outfile|o=s", "Output filename. [stdout] for screen." ],
         [ "genome|g=s", "Reference genome file.", { required => 1 }, ],
+        [ "name|n=s", "Default name for ranges.", ],
     );
 }
 
@@ -80,6 +81,10 @@ sub execute {
                     $location );
                 if ( defined $info->{strand} and $info->{strand} ne "+" ) {
                     $seq = App::Fasops::Common::revcom($seq);
+                }
+                if ( $opt->{name} ) {
+                    $info->{name} = $opt->{name};
+                    $range = App::RL::Common::encode_header($info);
                 }
                 print {$out_fh} ">$range\n";
                 print {$out_fh} "$seq\n";
