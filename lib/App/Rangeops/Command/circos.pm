@@ -55,10 +55,10 @@ sub execute {
     for my $file ( @{$args} ) {
         for my $line ( App::RL::Common::read_lines($file) ) {
             my @parts = split /\t/, $line;
+            my @colors = reverse map {"paired-12-qual-$_"} ( 1 .. 12 );
+            my $color_idx = 0;
 
             if ( defined $opt->{highlight} ) {
-                my @colors = reverse map {"paired-12-qual-$_"} ( 1 .. 12 );
-                my $color_idx = 0;
 
                 for my $part (@parts) {
                     my $info = App::RL::Common::decode_header($part);
