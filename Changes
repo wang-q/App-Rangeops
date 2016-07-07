@@ -1,6 +1,7 @@
 Revision history for App-Rangeops
 
 {{$NEXT}}
+    - Add codecov badge
 
 0.0.12  2016-06-30 11:11:13 CST
     - Add --name to command create
