@@ -1,6 +1,8 @@
 Revision history for App-Rangeops
 
 {{$NEXT}}
+
+0.0.13  2016-07-07 22:34:11 CST
     - Add codecov badge
 
 0.0.12  2016-06-30 11:11:13 CST

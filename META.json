@@ -68,7 +68,7 @@
          "web" : "https://github.com/wang-q/App-Rangeops"
       }
    },
-   "version" : "0.0.12",
+   "version" : "0.0.13",
    "x_serialization_backend" : "JSON::XS version 3.01"
 }
 
