@@ -31,7 +31,7 @@ sub description {
     my $desc;
     $desc .= ucfirst(abstract) . ".\n";
     $desc
-        .= "\t<infiles> are bilaterial links files, with or without hit strands\n";
+        .= "\t<infiles> are bilateral links files, with or without hit strands\n";
     return $desc;
 }
 
@@ -53,7 +53,7 @@ sub validate_args {
 
     if ( !exists $opt->{outfile} ) {
         $opt->{outfile}
-            = Path::Tiny::path( $args->[0] )->absolute . ".replace.tsv";
+            = Path::Tiny::path( $args->[0] )->absolute . ".clean.tsv";
     }
 }
 
@@ -61,7 +61,7 @@ sub execute {
     my ( $self, $opt, $args ) = @_;
 
     #----------------------------#
-    # Loading
+    # Load replaces
     #----------------------------#
     my $info_of    = {};    # info of ranges
     my $replace_of = {};
@@ -82,98 +82,106 @@ sub execute {
     #----------------------------#
     print STDERR "==> Incorporating strands\n" if $opt->{verbose};
     my @lines;
-    for my $line ( App::RL::Common::read_lines( $args->[0] ) ) {
-        $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
+    for my $file ( @{$args} ) {
+        for my $line ( App::RL::Common::read_lines( $file ) ) {
+            $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
 
-        my @new_parts;
+            my @new_parts;
 
-        # replacing
-        for my $part ( split /\t/, $line ) {
+            # replacing
+            for my $part ( split /\t/, $line ) {
 
-            if ( exists $replace_of->{$part} ) {
-                my $original = $part;
-                my $replaced = $replace_of->{$part};
+                if ( exists $replace_of->{$part} ) {
+                    my $original = $part;
+                    my $replaced = $replace_of->{$part};
 
-                # create new info, don't touch anything of $info_of
-                # use original strand
-                my %new = %{ $info_of->{$replaced} };
-                $new{strand} = $info_of->{$original}{strand};
+                    # create new info, don't touch anything of $info_of
+                    # use original strand
+                    my %new = %{ $info_of->{$replaced} };
+                    $new{strand} = $info_of->{$original}{strand};
 
-                my $new_part = App::RL::Common::encode_header( \%new, 1 );
-                push @new_parts, $new_part;
-            }
-            else {
-                push @new_parts, $part;
-            }
-        }
-        my $new_line = join "\t", @new_parts;
-        $info_of = App::Rangeops::Common::build_info( [$new_line], $info_of );
-
-        # incorporating
-        if ( @new_parts == 3 or @new_parts == 2 ) {
-            my $info_0 = $info_of->{ $new_parts[0] };
-            my $info_1 = $info_of->{ $new_parts[1] };
-
-            if (    App::RL::Common::info_is_valid($info_0)
-                and App::RL::Common::info_is_valid($info_1) )
-            {
-                my @strands;
-
-                if ( @new_parts == 3 ) {
-                    if ( $new_parts[2] eq "+" or $new_parts[2] eq "-" ) {
-                        push @strands, pop(@new_parts);    # new @new_parts == 2
-                    }
+                    my $new_part = App::RL::Common::encode_header( \%new, 1 );
+                    push @new_parts, $new_part;
                 }
-
-                if ( @new_parts == 2 ) {
-
-                    my %new_0 = %{$info_0};
-                    my %new_1 = %{$info_1};
-
-                    push @strands, $new_0{strand};
-                    push @strands, $new_1{strand};
-
-                    @strands = List::MoreUtils::PP::uniq(@strands);
-                    if ( @strands == 1 ) {
-                        $new_0{strand} = "+";
-                        $new_1{strand} = "+";
-                    }
-                    else {
-                        $new_0{strand} = "+";
-                        $new_1{strand} = "-";
-                    }
-
-                    my $range_0 = App::RL::Common::encode_header( \%new_0, 1 );
-                    $info_of->{$range_0} = \%new_0;
-                    my $range_1 = App::RL::Common::encode_header( \%new_1, 1 );
-                    $info_of->{$range_1} = \%new_1;
-
-                    @new_parts = ( $range_0, $range_1 );
-                    $new_line = join "\t", @new_parts;
+                else {
+                    push @new_parts, $part;
                 }
             }
-        }
-        $info_of = App::Rangeops::Common::build_info( [$new_line], $info_of );
+            my $new_line = join "\t", @new_parts;
+            $info_of
+                = App::Rangeops::Common::build_info( [$new_line], $info_of );
 
-        # skip identical ranges
-        if ( @new_parts == 2 ) {
-            my $info_0 = $info_of->{ $new_parts[0] };
-            my $info_1 = $info_of->{ $new_parts[1] };
+            # incorporating
+            if ( @new_parts == 3 or @new_parts == 2 ) {
+                my $info_0 = $info_of->{ $new_parts[0] };
+                my $info_1 = $info_of->{ $new_parts[1] };
 
-            if (    App::RL::Common::info_is_valid($info_0)
-                and App::RL::Common::info_is_valid($info_1) )
-            {
-                if (    $info_0->{chr} eq $info_1->{chr}
-                    and $info_0->{start} == $info_1->{start}
-                    and $info_0->{end} == $info_1->{end} )
+                if (    App::RL::Common::info_is_valid($info_0)
+                    and App::RL::Common::info_is_valid($info_1) )
                 {
-                    $new_line = undef;
+                    my @strands;
+
+                    if ( @new_parts == 3 ) {
+                        if ( $new_parts[2] eq "+" or $new_parts[2] eq "-" ) {
+                            push @strands,
+                                pop(@new_parts);    # new @new_parts == 2
+                        }
+                    }
+
+                    if ( @new_parts == 2 ) {
+
+                        my %new_0 = %{$info_0};
+                        my %new_1 = %{$info_1};
+
+                        push @strands, $new_0{strand};
+                        push @strands, $new_1{strand};
+
+                        @strands = List::MoreUtils::PP::uniq(@strands);
+                        if ( @strands == 1 ) {
+                            $new_0{strand} = "+";
+                            $new_1{strand} = "+";
+                        }
+                        else {
+                            $new_0{strand} = "+";
+                            $new_1{strand} = "-";
+                        }
+
+                        my $range_0
+                            = App::RL::Common::encode_header( \%new_0, 1 );
+                        $info_of->{$range_0} = \%new_0;
+                        my $range_1
+                            = App::RL::Common::encode_header( \%new_1, 1 );
+                        $info_of->{$range_1} = \%new_1;
+
+                        @new_parts = ( $range_0, $range_1 );
+                        $new_line = join "\t", @new_parts;
+                    }
                 }
             }
-        }
+            $info_of
+                = App::Rangeops::Common::build_info( [$new_line], $info_of );
 
-        push @lines, $new_line;
+            # skip identical ranges
+            if ( @new_parts == 2 ) {
+                my $info_0 = $info_of->{ $new_parts[0] };
+                my $info_1 = $info_of->{ $new_parts[1] };
+
+                if (    App::RL::Common::info_is_valid($info_0)
+                    and App::RL::Common::info_is_valid($info_1) )
+                {
+                    if (    $info_0->{chr} eq $info_1->{chr}
+                        and $info_0->{start} == $info_1->{start}
+                        and $info_0->{end} == $info_1->{end} )
+                    {
+                        $new_line = undef;
+                    }
+                }
+            }
+
+            push @lines, $new_line;
+        }
     }
+
     @lines   = grep {defined} List::MoreUtils::PP::uniq(@lines);
     @lines   = @{ App::Rangeops::Common::sort_links( \@lines ) };
     $info_of = App::Rangeops::Common::build_info_intspan( \@lines );
