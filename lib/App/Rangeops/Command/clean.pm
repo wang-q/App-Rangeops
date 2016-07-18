@@ -83,7 +83,7 @@ sub execute {
     print STDERR "==> Incorporating strands\n" if $opt->{verbose};
     my @lines;
     for my $file ( @{$args} ) {
-        for my $line ( App::RL::Common::read_lines( $file ) ) {
+        for my $line ( App::RL::Common::read_lines($file) ) {
             $info_of = App::Rangeops::Common::build_info( [$line], $info_of );
 
             my @new_parts;
@@ -201,7 +201,8 @@ sub execute {
         } @lines;
         for my $i ( 0 .. $#lines - 1 ) {
             my @rest_idx
-                = grep { $chr_pairs[$i] eq $chr_pairs[$_] } $i + 1 .. $#lines;
+                = grep { $chr_pairs[$i] eq $chr_pairs[$_] }
+                ( $i + 1 .. $#lines );
 
             for my $j (@rest_idx) {
                 my $line_i = $lines[$i];
@@ -250,7 +251,7 @@ sub execute {
         for my $i ( 0 .. $#lines - 1 ) {
             my @rest_idx
                 = grep { $chr_strand_pairs[$i] eq $chr_strand_pairs[$_] }
-                $i + 1 .. $#lines;
+                ( $i + 1 .. $#lines );
 
             for my $j (@rest_idx) {
                 my $line_i = $lines[$i];
@@ -283,7 +284,7 @@ sub execute {
         # bundle connected lines
         my @cc = grep { scalar @{$_} > 1 } $graph->connected_components;
         for my $c (@cc) {
-            printf "\n" . " " x 4 . "Merge %s lines\n", scalar @{$c}
+            printf STDERR "\n" . " " x 4 . "Merge %s lines\n", scalar @{$c}
                 if $opt->{verbose};
 
             my @merged_range;
