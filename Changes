@@ -2,6 +2,9 @@ Revision history for App-Rangeops
 
 {{$NEXT}}
 
+0.0.14  2016-12-09 22:16:36 CST
+    - Release to CPAN
+
 0.0.13  2016-07-07 22:34:11 CST
     - Add codecov badge
 
