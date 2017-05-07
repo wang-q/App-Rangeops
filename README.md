@@ -1,7 +1,4 @@
-[![Build Status](https://travis-ci.org/wang-q/App-Rangeops.svg?branch=master)](https://travis-ci.org/wang-q/App-Rangeops)
-[![codecov](https://codecov.io/gh/wang-q/App-Rangeops/branch/master/graph/badge.svg)](https://codecov.io/gh/wang-q/App-Rangeops)
-[![Cpan version](https://img.shields.io/cpan/v/App-Rangeops.svg)](https://metacpan.org/release/App-Rangeops)
-
+[![Build Status](https://travis-ci.org/wang-q/App-Rangeops.svg?branch=master)](https://travis-ci.org/wang-q/App-Rangeops) [![Coverage Status](http://codecov.io/github/wang-q/App-Rangeops/coverage.svg?branch=master)](https://codecov.io/github/wang-q/App-Rangeops?branch=master) [![MetaCPAN Release](https://badge.fury.io/pl/App-Rangeops.svg)](https://metacpan.org/release/App-Rangeops)
 # NAME
 
 App::Rangeops - operates ranges and links of ranges on chromosomes

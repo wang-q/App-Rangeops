@@ -1,6 +1,6 @@
 package App::Rangeops;
 
-our $VERSION = '0.0.14';
+our $VERSION = '0.1.0';
 
 use strict;
 use warnings;

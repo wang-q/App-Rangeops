@@ -2,6 +2,10 @@ Revision history for App-Rangeops
 
 {{$NEXT}}
 
+0.1.0 2017-05-07T19:44:32Z
+    - Switch to Minilla
+    - Mature enough
+
 0.0.14  2016-12-09 22:16:36 CST
     - Release to CPAN
 
