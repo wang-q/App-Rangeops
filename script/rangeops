@@ -28,6 +28,7 @@ perl -I lib/ script/rangeops clean t/II.sort.tsv --bundle 500 -o stdout
 perl -I lib/ script/rangeops clean t/II.sort.tsv -r t/II.merge.tsv -o stdout
 cat t/II.sort.tsv \
     | perl -I lib/ script/rangeops clean stdin -r t/II.merge.tsv -o t/II.clean.tsv
+perl -I lib/ script/rangeops clean t/links.sort.tsv -o stdout
 
 perl -I lib/ script/rangeops connect t/II.clean.tsv -v -o t/II.connect.tsv
 

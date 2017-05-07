@@ -20,4 +20,7 @@ $result = test_app( 'App::Rangeops' => [qw(clean t/II.sort.tsv -r t/II.merge.tsv
 is( ( scalar grep {/\S/} split( /\n/, $result->stdout ) ), 8, 'line count' );
 unlike( $result->stdout, qr{892-4684}, 'runlist merged' );
 
+$result = test_app( 'App::Rangeops' => [qw(clean t/links.sort.tsv -o stdout)] );
+is( ( scalar grep {/\S/} split( /\n/, $result->stdout ) ), 0, 'empty file' );
+
 done_testing();
